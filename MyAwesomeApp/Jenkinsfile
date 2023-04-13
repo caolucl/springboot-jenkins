@@ -20,16 +20,14 @@ pipeline {
                     sh 'mvn -f MyAwesomeApp/pom.xml clean install'        
                 }
                 
-            }
-                    
-            }
+            }            
+        }
             
         stage ('archive') {
             steps{
                 archiveArtifacts '**/*.jar'
-            }
-                
-            }
+            }        
+        }
         stage('Building image') {
             steps{
                 script {
@@ -37,7 +35,7 @@ pipeline {
                 dockerImage = docker.build("caolucl/springboot_1:${env.BUILD_NUMBER}")
                 }
             }
-            }
+        }
         /*    
         stage ('Docker Build') {
             // Build and push image with Jenkins' docker-plugin
@@ -52,7 +50,7 @@ pipeline {
         }
         */
         // Uploading Docker images into Docker Hub
-            stage('Upload Image') {
+        stage('Upload Image') {
             steps{    
                 script {
                     docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
@@ -60,19 +58,26 @@ pipeline {
                     }
                 }
             }
-            }
+        }
         
         stage('docker stop container') {
-            script{
-                sh 'docker ps -f name=myContainer -q | xargs --no-run-if-empty docker container stop'
-                sh 'docker container ls -a -fname=myContainer -q | xargs -r docker container rm'
+            steps{
+                script{
+                    sh 'docker ps -f name=myContainer -q | xargs --no-run-if-empty docker container stop'
+                    sh 'docker container ls -a -fname=myContainer -q | xargs -r docker container rm'
+                }
+
             }
+            
         }
 
         stage ('Docker run') {
-            script{
-               sh 'docker run -p 8085:8085 --rm --name myContainer'
+            steps{
+                script{
+                    sh 'docker run -p 8085:8085 --rm --name myContainer'
+                }   
             }
+            
 
         }
     }
