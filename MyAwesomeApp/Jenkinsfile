@@ -1,0 +1,63 @@
+
+node {
+  
+  def image
+  def mvnHome = tool 'Maven3'
+
+  
+     stage ('checkout') {
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/caolucl/springboot-jenkins.git']]])       
+        }
+    
+    
+    stage ('Build') {
+            sh 'mvn -f MyAwesomeApp/pom.xml clean install'            
+        }
+        
+    stage ('archive') {
+            archiveArtifacts '**/*.jar'
+        }
+    stage('Building image') {
+          steps{
+            script {
+              //dockerImage = docker.build("caolucl/python_test:${env.BUILD_ID}")
+              dockerImage = docker.build("caolucl/springboot_1:${env.BUILD_NUMBER}")
+            }
+          }
+        }
+    /*    
+    stage ('Docker Build') {
+         // Build and push image with Jenkins' docker-plugin
+        script {
+
+            docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+            image = docker.build("ananthkannan/mywebapp", "MyAwesomeApp")
+            image.push()
+            
+            }
+        }
+    }
+    */
+     // Uploading Docker images into Docker Hub
+        stage('Upload Image') {
+         steps{    
+             script {
+                docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+                dockerImage.push()
+                }
+            }
+          }
+        }
+    
+       stage('docker stop container') {
+            sh 'docker ps -f name=myContainer -q | xargs --no-run-if-empty docker container stop'
+            sh 'docker container ls -a -fname=myContainer -q | xargs -r docker container rm'
+
+       }
+
+    stage ('Docker run') {
+
+        image.run("-p 8085:8085 --rm --name myContainer")
+
+    }
+}
