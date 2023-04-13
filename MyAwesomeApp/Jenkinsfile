@@ -33,7 +33,7 @@ pipeline {
                 script {
                 def dockerfile = 'Dockerfile'
                 //dockerImage = docker.build("caolucl/python_test:${env.BUILD_ID}")
-                dockerImage = docker.build("caolucl/springboot_1:${env.BUILD_NUMBER}", "-./MyAwesomeApp")
+                dockerImage = docker.build("caolucl/springboot_1:${env.BUILD_NUMBER}", "./MyAwesomeApp")
                 }
             }
         }
