@@ -31,8 +31,9 @@ pipeline {
         stage('Building image') {
             steps{
                 script {
+                def dockerfile = 'Dockerfile'
                 //dockerImage = docker.build("caolucl/python_test:${env.BUILD_ID}")
-                dockerImage = docker.build("caolucl/springboot_1:${env.BUILD_NUMBER}")
+                dockerImage = docker.build("caolucl/springboot_1:${env.BUILD_NUMBER}", "-f ${dockerfile} ./MyAwesomeApp")
                 }
             }
         }
