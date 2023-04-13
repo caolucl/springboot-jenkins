@@ -15,14 +15,17 @@ pipeline {
         
         
         stage ('Build') {
-            step{
-                sh 'mvn -f MyAwesomeApp/pom.xml clean install'        
+            steps{
+                script{
+                    sh 'mvn -f MyAwesomeApp/pom.xml clean install'        
+                }
+                
             }
                     
             }
             
         stage ('archive') {
-            step{
+            steps{
                 archiveArtifacts '**/*.jar'
             }
                 
@@ -60,14 +63,16 @@ pipeline {
             }
         
         stage('docker stop container') {
+            script{
                 sh 'docker ps -f name=myContainer -q | xargs --no-run-if-empty docker container stop'
                 sh 'docker container ls -a -fname=myContainer -q | xargs -r docker container rm'
-
+            }
         }
 
         stage ('Docker run') {
-
-            image.run("-p 8085:8085 --rm --name myContainer")
+            script{
+               sh 'docker run -p 8085:8085 --rm --name myContainer'
+            }
 
         }
     }
