@@ -1,8 +1,9 @@
-
-node {
-  
-  def image
-  def mvnHome = tool 'maven3.6.0'
+pipeline {
+    agent any
+    environment {
+        PATH = "/opt/maven/bin:$PATH"
+        SSH_CONFIG_NAME = "localhost"
+    }
 
   
      stage ('checkout') {
